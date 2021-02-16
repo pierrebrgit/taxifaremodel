@@ -4,9 +4,11 @@ from sklearn.compose import make_column_transformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 from TaxiFareModel.encoders import DistanceTransformer, TimeFeaturesEncoder
 from TaxiFareModel.utils import compute_rmse
+from TaxiFareModel.data import get_data, clean_data
 
 
 class Trainer():
@@ -45,9 +47,22 @@ class Trainer():
 
 if __name__ == "__main__":
     # get data
+    taxi_df = get_data()
+
     # clean data
+    taxi_df = clean_data(taxi_df)
+
     # set X and y
+    X = taxi_df.drop(columns="fare_amount")
+    y = taxi_df.fare_amount
+
     # hold out
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)  # noqa: E501
+
     # train
+    my_trainer = Trainer(X_train, y_train)
+    my_trainer.run()
+
     # evaluate
-    print('TODO')
+    rmse = my_trainer.evaluate(X_test, y_test)
+    print("RMSE :", rmse)
